@@ -20,5 +20,10 @@ APIs for live session management.
 APIs for group projects and peer-to-peer interaction.
 Content Repository Module:
 
+run the command in terminal : python manage.py runserver 
+if you want to run the server on a specific port the just write : python manage.py runserver 9005
+9005 is your port
+
+
 Django models for storing and organizing educational resources.
 APIs for searching, categorization, and accessing resources.
