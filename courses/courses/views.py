@@ -1,23 +1,33 @@
 from rest_framework import viewsets
 from django.http import JsonResponse
+from .models import Course,Lesson,Assessment
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
+from .serializers import CourseSerializer,AssessmentSerializer,LessonSerializer
 from .models import Course, Lesson, Assessment
 from .serializers import CourseSerializer, LessonSerializer, AssessmentSerializer
 
-class CourseViewSet(viewsets.ModelViewSet):
-    queryset = Course.objects.all()
-    serializer_class = CourseSerializer
-
-class LessonViewSet(viewsets.ModelViewSet):
-    queryset = Lesson.objects.all()
-    serializer_class = LessonSerializer
-
-class AssessmentViewSet(viewsets.ModelViewSet):
-    queryset = Assessment.objects.all()
-    serializer_class = AssessmentSerializer
 
 @api_view(['GET','POST'])
-def drink_list(request):
+def course_list(request):
     print(request.method)
-    return JsonResponse({"Successfully hitting the Courses Route":"True"})
+    if request.method == 'GET':
+        courses=Course.objects.all()
+        serializer=CourseSerializer(courses,many=True)
+        return JsonResponse({"courses":serializer.data})
+    
+@api_view(['GET','POST'])
+def lesson_list(request):
+    print(request.method)
+    if request.method == 'GET':
+        lessons=Lesson.objects.all()
+        serializer=LessonSerializer(lessons,many=True)
+        return JsonResponse({"lessons":serializer.data})
+    
+@api_view(['GET','POST'])
+def assessment_list(request):
+    print(request.method)
+    if request.method == 'GET':
+        assessments=Assessment.objects.all()
+        serializer=AssessmentSerializer(assessments,many=True)
+        return JsonResponse({"assessments":serializer.data})
