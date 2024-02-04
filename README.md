@@ -25,6 +25,8 @@ if you want to run the server on a specific port then just write : python manage
 9005 is your port
 
 Added Features: routes added to GET and POST of courses,lessons,assessments (e.g:http://127.0.0.1:8000/courses/,assessments,lessons).
+You can also access admin route : http://127.0.0.1:8000/admin/
+Do pip install packagename for any package
 
 
 Django models for storing and organizing educational resources.
