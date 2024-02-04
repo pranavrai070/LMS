@@ -21,8 +21,10 @@ APIs for group projects and peer-to-peer interaction.
 Content Repository Module:
 
 run the command in terminal : python manage.py runserver 
-if you want to run the server on a specific port the just write : python manage.py runserver 9005
+if you want to run the server on a specific port then just write : python manage.py runserver 9005
 9005 is your port
+
+Added Features: routes added to GET and POST of courses,lessons,assessments (e.g:http://127.0.0.1:8000/courses/,assessments,lessons).
 
 
 Django models for storing and organizing educational resources.
