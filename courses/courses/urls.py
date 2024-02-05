@@ -23,5 +23,8 @@ urlpatterns = [
     path('courses/', views.course_list),
     path('lessons/', views.lesson_list),
     path('assessments/', views.assessment_list),
-
+    path('activities/', views.activities),
+    path('users/', views.users),
+    path('student_progress/', views.student_progress_route),
+    path('login/', views.login),
 ]
