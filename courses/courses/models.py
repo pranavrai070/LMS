@@ -1,5 +1,6 @@
 from django.db import models
 
+
 class Course(models.Model):
     title = models.CharField(max_length=255)
     description = models.TextField()
@@ -22,3 +23,39 @@ class Assessment(models.Model):
 
     def __str__(self):
         return self.title
+    
+class Activities(models.Model):
+    course = models.ForeignKey(Course, on_delete=models.CASCADE)
+    title = models.CharField(max_length=255)
+    description = models.TextField()
+
+    def __str__(self):
+        return self.title
+    
+class Users(models.Model):
+    user_name = models.CharField(max_length=255)
+    full_name=models.CharField(max_length=255)
+    email=models.CharField(max_length=255)
+    password=models.CharField(max_length=255)
+    mobile=models.CharField(max_length=15)
+    birthDate = models.DateTimeField()
+    user_type = models.CharField(max_length=255)
+    dtti_created = models.DateTimeField(auto_now_add=True)
+    dtti_updated = models.DateTimeField(auto_now=True) 
+
+
+    def __str__(self):
+        return self.user_name
+    
+class student_progress(models.Model):
+    course = models.ForeignKey(Course, on_delete=models.CASCADE)
+    user_name = models.ForeignKey(Users, on_delete=models.CASCADE)
+    progressPercentage=models.IntegerField(null=True, blank=True)
+
+    def __str__(self):
+        return self.progressPercentage
+    
+
+    
+
+    

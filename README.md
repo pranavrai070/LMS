@@ -31,3 +31,6 @@ Do pip install packagename for any package
 
 Django models for storing and organizing educational resources.
 APIs for searching, categorization, and accessing resources.
+
+Id for admin login: pranav
+password for admin login : Django@1999
