@@ -3,13 +3,17 @@ from django.http import JsonResponse
 from .models import Course,Lesson,Assessment
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
+from django.views.decorators.csrf import csrf_exempt
 from rest_framework import status
+from django.utils import timezone
+from datetime import timedelta
 from .serializers import CourseSerializer,AssessmentSerializer,LessonSerializer
 from .models import Course, Lesson, Assessment,Activities,Users,student_progress,tr_user_login_token
 from .serializers import CourseSerializer, LessonSerializer, AssessmentSerializer,ActivitiesSerializer,UsersSerializer,student_progressSerializer,tr_user_login_token_Serializer
 import secrets
 
 
+@csrf_exempt
 @api_view(['GET','POST'])
 def course_list(request):
     print(request.method)
@@ -26,6 +30,7 @@ def course_list(request):
         else:
             return Response({"message":"Data is Not Validated"},status=status.HTTP_400_BAD_REQUEST)
     
+@csrf_exempt    
 @api_view(['GET','POST'])
 def lesson_list(request):
     print(request.method)
@@ -42,6 +47,7 @@ def lesson_list(request):
         else:
             return Response({"message":"Data is Not Validated"},status=status.HTTP_400_BAD_REQUEST)
     
+@csrf_exempt    
 @api_view(['GET','POST'])
 def assessment_list(request):
     print(request.method)
@@ -58,7 +64,7 @@ def assessment_list(request):
         else:
             return Response({"message":"Data is Not Validated"},status=status.HTTP_400_BAD_REQUEST)
         
-
+@csrf_exempt
 @api_view(['GET','POST'])
 def activities(request):
     print(request.method)
@@ -75,7 +81,7 @@ def activities(request):
         else:
             return Response({"message":"Data is Not Validated"},status=status.HTTP_400_BAD_REQUEST)
         
-
+@csrf_exempt
 @api_view(['GET','POST'])
 def users(request):
     print(request.method)
@@ -92,7 +98,7 @@ def users(request):
         else:
             return Response({"message":"Data is Not Validated"},status=status.HTTP_400_BAD_REQUEST)
         
-
+@csrf_exempt
 @api_view(['GET','POST'])
 def student_progress_route(request):
     print(request.method)
@@ -108,7 +114,8 @@ def student_progress_route(request):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         else:
             return Response({"message":"Data is Not Validated"},status=status.HTTP_400_BAD_REQUEST)
-        
+
+@csrf_exempt       
 @api_view(['GET','POST'])
 def login(request):
     print(request.method)
@@ -138,9 +145,29 @@ def login(request):
                         # Generate a random token with 32 characters
                         return secrets.token_hex(16)
                     random_token = generate_random_token()
+                    # Check if there is an existing token with dtti_logout as null
+                    existing_token = tr_user_login_token.objects.filter(user_id=user_data.id, dtti_logout__isnull=True).first()
+                    print('existing_toke',existing_token)
 
-                    token=tr_user_login_token.objects.all()
-                    token_serializer=tr_user_login_token_Serializer(token,many=True) 
+                    if existing_token:
+                        # If an existing token is found, update dtti_logout and dtti_updated
+                        existing_token.dtti_logout = timezone.now()
+                        existing_token.dtti_updated = timezone.now()
+                        existing_token.save()
+                        new_token = tr_user_login_token(
+                            user_id=user_data.id,
+                            token=random_token,
+                            dtti_expiry=timezone.now() + timedelta(hours=6)
+                        )
+                        new_token.save()
+                    else:
+                        # Add a new token for the user with dtti_expiry 6hrs plus from now
+                        new_token = tr_user_login_token(
+                            user_id=user_data.id,
+                            token=random_token,
+                            dtti_expiry=timezone.now() + timedelta(hours=6)
+                        )
+                        new_token.save()
                     return JsonResponse({"message": "Login successful", "token": random_token, "user_id": user_data.id,"user_type":user_data.user_type})
                 else:
                     # Password is incorrect, return response
