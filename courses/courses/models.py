@@ -59,6 +59,18 @@ class student_progress(models.Model):
 
     def __str__(self):
         return self.progressPercentage
+    
+class tr_user_login_token(models.Model):
+    user_id=models.ForeignKey(Users, on_delete=models.CASCADE)
+    token=models.CharField(max_length=255)
+    dtti_expiry=models.DateTimeField()
+    dtti_logout=models.DateTimeField(null=True,blank=True)
+    dtti_created=models.DateTimeField(auto_now_add=True)
+    dtti_updated=models.DateTimeField(null=True,blank=True)
+
+    def __str__(self):
+        return self.token
+
 
 
     

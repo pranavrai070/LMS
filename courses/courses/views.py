@@ -5,8 +5,9 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
 from .serializers import CourseSerializer,AssessmentSerializer,LessonSerializer
-from .models import Course, Lesson, Assessment,Activities,Users,student_progress
-from .serializers import CourseSerializer, LessonSerializer, AssessmentSerializer,ActivitiesSerializer,UsersSerializer,student_progressSerializer
+from .models import Course, Lesson, Assessment,Activities,Users,student_progress,tr_user_login_token
+from .serializers import CourseSerializer, LessonSerializer, AssessmentSerializer,ActivitiesSerializer,UsersSerializer,student_progressSerializer,tr_user_login_token_Serializer
+import secrets
 
 
 @api_view(['GET','POST'])
@@ -114,9 +115,42 @@ def login(request):
     if request.method == 'GET':
         return Response({"message":"GET request Method is Not Allowed on this route"},status=status.HTTP_405_METHOD_NOT_ALLOWED)
     if(request.method=='POST'):
-        print(request.data)
+        print('printing incoming data')
         users=Users.objects.all()
         serializer=UsersSerializer(users,many=True) 
         print('serializer_data got printing')
         print(serializer.data)
-        return JsonResponse({"message":"login route gets hit"})
+        print(request.data)
+        incoming_data = request.data
+        for user_data in users:
+            if (
+                incoming_data['in_login_id'] == user_data.user_name or
+                incoming_data['in_login_id'] == user_data.email or
+                incoming_data['in_login_id'] == user_data.mobile
+            ):
+                def custom_check_password(raw_password, stored_password):
+                    # Check if the raw_password matches the stored password
+                    return raw_password == stored_password
+                # Match found, check password
+                if custom_check_password(incoming_data['in_password'], user_data.password):
+                    # Password is correct, return response with token and user_id
+                    def generate_random_token():
+                        # Generate a random token with 32 characters
+                        return secrets.token_hex(16)
+                    random_token = generate_random_token()
+
+                    token=tr_user_login_token.objects.all()
+                    token_serializer=tr_user_login_token_Serializer(token,many=True) 
+                    return JsonResponse({"message": "Login successful", "token": random_token, "user_id": user_data.id,"user_type":user_data.user_type})
+                else:
+                    # Password is incorrect, return response
+                    print('getting password compare')
+                    print(type(incoming_data['in_password']))
+                    print(type(user_data.password))
+                    return JsonResponse({"message": "Invalid password"}, status=status.HTTP_401_UNAUTHORIZED)
+        
+        # No match found, return response
+        return JsonResponse({"message": "Invalid username"}, status=status.HTTP_404_NOT_FOUND)
+    else:
+        return Response({"message": "GET request Method is Not Allowed on this route"}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+        
