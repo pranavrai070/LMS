@@ -148,26 +148,27 @@ def login(request):
                     # Check if there is an existing token with dtti_logout as null
                     existing_token = tr_user_login_token.objects.filter(user_id=user_data.id, dtti_logout__isnull=True).first()
                     print('existing_toke',existing_token)
+                    user_instance = Users.objects.get(id=user_data.id)
 
-                    # if existing_token:
-                    #     # If an existing token is found, update dtti_logout and dtti_updated
-                    #     existing_token.dtti_logout = timezone.now()
-                    #     existing_token.dtti_updated = timezone.now()
-                    #     existing_token.save()
-                    #     new_token = tr_user_login_token(
-                    #         user_id=user_data.id,
-                    #         token=random_token,
-                    #         dtti_expiry=timezone.now() + timedelta(hours=6)
-                    #     )
-                    #     new_token.save()
-                    # else:
-                    #     # Add a new token for the user with dtti_expiry 6hrs plus from now
-                    #     new_token = tr_user_login_token(
-                    #         user_id=user_data.id,
-                    #         token=random_token,
-                    #         dtti_expiry=timezone.now() + timedelta(hours=6)
-                    #     )
-                    #     new_token.save()
+                    if existing_token:
+                        # If an existing token is found, update dtti_logout and dtti_updated
+                        existing_token.dtti_logout = timezone.now()
+                        existing_token.dtti_updated = timezone.now()
+                        existing_token.save()
+                        new_token = tr_user_login_token(
+                            user_id=user_instance,
+                            token=random_token,
+                            dtti_expiry=timezone.now() + timedelta(hours=6)
+                        )
+                        new_token.save()
+                    else:
+                        # Add a new token for the user with dtti_expiry 6hrs plus from now
+                        new_token = tr_user_login_token(
+                            user_id=user_instance,
+                            token=random_token,
+                            dtti_expiry=timezone.now() + timedelta(hours=6)
+                        )
+                        new_token.save()
                     return JsonResponse({"message": "Login successful", "token": random_token, "user_id": user_data.id,"user_type":user_data.user_type})
                 else:
                     # Password is incorrect, return response
