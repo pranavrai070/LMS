@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Course, Lesson, Assessment,Activities,Users,student_progress,tr_user_login_token
+from .models import Course, Lesson, Assessment,Activities,Question,Users,student_progress,tr_user_login_token
 
 class CourseSerializer(serializers.ModelSerializer):
     class Meta:
@@ -19,6 +19,11 @@ class AssessmentSerializer(serializers.ModelSerializer):
 class ActivitiesSerializer(serializers.ModelSerializer):
     class Meta:
         model = Activities
+        fields = '__all__'
+
+class QuestionsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Question
         fields = '__all__'
 
 class UsersSerializer(serializers.ModelSerializer):

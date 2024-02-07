@@ -19,19 +19,34 @@ class Lesson(models.Model):
 
 class Assessment(models.Model):
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
+    lesson=models.ForeignKey(Lesson, on_delete=models.CASCADE,default=1)
     title = models.CharField(max_length=255)
-    questions = models.TextField()
+    questions = models.ManyToManyField('Question')
 
     def __str__(self):
         return self.title
     
 class Activities(models.Model):
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
+    lesson=models.ForeignKey(Lesson, on_delete=models.CASCADE,default=1)  
     title = models.CharField(max_length=255)
     description = models.TextField()
 
     def __str__(self):
         return self.title
+    
+class Question(models.Model):
+    question=models.CharField(max_length=1000)
+    assesment=models.ForeignKey(Assessment, on_delete=models.CASCADE,default=1)
+    course = models.ForeignKey(Course, on_delete=models.CASCADE)
+    lesson=models.ForeignKey(Lesson, on_delete=models.CASCADE)
+    options= models.CharField(max_length=1000)
+    answer = models.CharField(max_length=255)
+    description = models.TextField()
+
+    def __str__(self):
+        return self.question
+    
     
 class Users(models.Model):
     user_name = models.CharField(max_length=255)

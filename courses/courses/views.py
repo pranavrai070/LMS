@@ -8,8 +8,8 @@ from rest_framework import status
 from django.utils import timezone
 from datetime import timedelta
 from .serializers import CourseSerializer,AssessmentSerializer,LessonSerializer
-from .models import Course, Lesson, Assessment,Activities,Users,student_progress,tr_user_login_token
-from .serializers import CourseSerializer, LessonSerializer, AssessmentSerializer,ActivitiesSerializer,UsersSerializer,student_progressSerializer,tr_user_login_token_Serializer
+from .models import Course, Lesson, Assessment,Activities,Users,Question,student_progress,tr_user_login_token
+from .serializers import CourseSerializer, LessonSerializer, AssessmentSerializer,ActivitiesSerializer,UsersSerializer,QuestionsSerializer,student_progressSerializer,tr_user_login_token_Serializer
 import secrets
 
 
@@ -32,11 +32,15 @@ def course_list(request):
     
 @csrf_exempt    
 @api_view(['GET','POST'])
-def lesson_list(request):
+def lesson_list(request,course_id):
     print(request.method)
     if request.method == 'GET':
-        lessons=Lesson.objects.all()
+        # course_id=1
+        print('printing course id parameter')
+        print(course_id)
+        lessons=Lesson.objects.filter(course=course_id)
         serializer=LessonSerializer(lessons,many=True)
+        print(serializer.data)
         return JsonResponse({"lessons":serializer.data})
     if(request.method=='POST'):
         print(request.data)
@@ -49,10 +53,10 @@ def lesson_list(request):
     
 @csrf_exempt    
 @api_view(['GET','POST'])
-def assessment_list(request):
+def assessment_list(request,course_id):
     print(request.method)
     if request.method == 'GET':
-        assessments=Assessment.objects.all()
+        assessments=Assessment.objects.filter(course=course_id)
         serializer=AssessmentSerializer(assessments,many=True)
         return JsonResponse({"assessments":serializer.data})
     if(request.method=='POST'):
@@ -66,10 +70,10 @@ def assessment_list(request):
         
 @csrf_exempt
 @api_view(['GET','POST'])
-def activities(request):
+def activities(request,lesson_id):
     print(request.method)
     if request.method == 'GET':
-        activities=Activities.objects.all()
+        activities=Activities.objects.filter(lesson=lesson_id)
         serializer=ActivitiesSerializer(activities,many=True)
         return JsonResponse({"activities":serializer.data})
     if(request.method=='POST'):
@@ -109,6 +113,24 @@ def student_progress_route(request):
     if(request.method=='POST'):
         print(request.data)
         serializer=student_progressSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        else:
+            return Response({"message":"Data is Not Validated"},status=status.HTTP_400_BAD_REQUEST)
+        
+
+@csrf_exempt
+@api_view(['GET','POST'])
+def questions(request,assesment_id):
+    print(request.method)
+    if request.method == 'GET':
+        questions=Question.objects.filter(assesment=assesment_id)
+        serializer=QuestionsSerializer(questions,many=True)
+        return JsonResponse({"questions":serializer.data})
+    if(request.method=='POST'):
+        print(request.data)
+        serializer=QuestionsSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
