@@ -34,3 +34,17 @@ APIs for searching, categorization, and accessing resources.
 
 Id for admin login: pranav
 password for admin login : Django@1999
+
+Routes working till Now:
+    'courses/'  --GET,POST
+    'lessons/<int:course_id>/'  --GET
+    'assessments/<int:course_id>' --GET
+    'activities/<int:lesson_id>' --GET
+    'questions/<int:assesment_id>' --GET
+    'users/' --GET
+    'login/' --POST
+
+
+another Admin Credentials added:
+ username: admin
+ password: password
