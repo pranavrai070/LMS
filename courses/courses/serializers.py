@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Course, Lesson, Assessment,Activities,Question,Users,student_progress,tr_user_login_token
+from .models import Course, Lesson, Assessment,Activities,Question,Users,student_progress,tr_user_login_token,StudentActivityProgress,StudentInfoProgress,StudentLessonProgress,Info
 
 class CourseSerializer(serializers.ModelSerializer):
     class Meta:
@@ -21,9 +21,29 @@ class ActivitiesSerializer(serializers.ModelSerializer):
         model = Activities
         fields = '__all__'
 
+class InfoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Info
+        fields = '__all__'
+
 class QuestionsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Question
+        fields = '__all__'
+
+class StudentLessonProgressSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = StudentLessonProgress
+        fields = '__all__'
+
+class StudentInfoProgressSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = StudentInfoProgress
+        fields = '__all__'
+
+class StudentActivityProgressSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = StudentActivityProgress
         fields = '__all__'
 
 class UsersSerializer(serializers.ModelSerializer):

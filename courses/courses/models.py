@@ -35,6 +35,14 @@ class Activities(models.Model):
     def __str__(self):
         return self.title
     
+class Info(models.Model):
+    title = models.CharField(max_length=100)
+    description=models.CharField(max_length=10000)
+    lesson = models.ForeignKey(Lesson, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return self.title
+    
 class Question(models.Model):
     question=models.CharField(max_length=1000)
     assesment=models.ForeignKey(Assessment, on_delete=models.CASCADE,default=1)
@@ -68,13 +76,37 @@ class Users(models.Model):
         return self.user_name
     
 class student_progress(models.Model):
-    course = models.ForeignKey(Course, on_delete=models.CASCADE)
-    user_name = models.ForeignKey(Users, on_delete=models.CASCADE)
-    progressPercentage=models.IntegerField(null=True, blank=True)
+    student = models.ForeignKey(Users, on_delete=models.CASCADE)
+    lessons = models.ManyToManyField('Lesson')
+    assessments = models.ManyToManyField('Assessment')
+    ativities = models.ManyToManyField('Activities')
+    courses= models.ManyToManyField('Course')
 
     def __str__(self):
-        return self.progressPercentage
+        return self.student
     
+
+class StudentLessonProgress(models.Model):
+    student = models.ForeignKey(Users, on_delete=models.CASCADE)
+    lesson = models.ForeignKey(Lesson, on_delete=models.CASCADE)
+    completed = models.BooleanField(default=False)
+
+class StudentActivityProgress(models.Model):
+    student = models.ForeignKey(Users, on_delete=models.CASCADE)
+    activity = models.ForeignKey(Activities, on_delete=models.CASCADE)
+    completed = models.BooleanField(default=False)
+
+class StudentAssessmentProgress(models.Model):
+    student = models.ForeignKey(Users, on_delete=models.CASCADE)
+    assessment = models.ForeignKey(Assessment, on_delete=models.CASCADE)
+    completed = models.BooleanField(default=False)
+
+class StudentInfoProgress(models.Model):
+    student = models.ForeignKey(Users, on_delete=models.CASCADE)
+    info = models.ForeignKey(Info, on_delete=models.CASCADE)
+    completed = models.BooleanField(default=False)
+    
+ 
 class tr_user_login_token(models.Model):
     user_id=models.ForeignKey(Users, on_delete=models.CASCADE)
     token=models.CharField(max_length=255)

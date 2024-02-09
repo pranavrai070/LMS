@@ -8,8 +8,8 @@ from rest_framework import status
 from django.utils import timezone
 from datetime import timedelta
 from .serializers import CourseSerializer,AssessmentSerializer,LessonSerializer
-from .models import Course, Lesson, Assessment,Activities,Users,Question,student_progress,tr_user_login_token
-from .serializers import CourseSerializer, LessonSerializer, AssessmentSerializer,ActivitiesSerializer,UsersSerializer,QuestionsSerializer,student_progressSerializer,tr_user_login_token_Serializer
+from .models import Course, Lesson, Assessment,Activities,Users,Question,student_progress,tr_user_login_token,StudentActivityProgress,StudentAssessmentProgress,StudentInfoProgress,Info,StudentLessonProgress
+from .serializers import CourseSerializer, LessonSerializer, AssessmentSerializer,ActivitiesSerializer,UsersSerializer,QuestionsSerializer,student_progressSerializer,tr_user_login_token_Serializer,StudentActivityProgressSerializer,StudentLessonProgressSerializer,StudentInfoProgressSerializer,InfoSerializer
 import secrets
 
 
@@ -53,10 +53,10 @@ def lesson_list(request,course_id):
     
 @csrf_exempt    
 @api_view(['GET','POST'])
-def assessment_list(request,course_id):
+def assessment_list(request,lesson_id):
     print(request.method)
     if request.method == 'GET':
-        assessments=Assessment.objects.filter(course=course_id)
+        assessments=Assessment.objects.filter(lesson=lesson_id)
         serializer=AssessmentSerializer(assessments,many=True)
         return JsonResponse({"assessments":serializer.data})
     if(request.method=='POST'):
@@ -136,6 +136,102 @@ def questions(request,assesment_id):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         else:
             return Response({"message":"Data is Not Validated"},status=status.HTTP_400_BAD_REQUEST)
+        
+
+@csrf_exempt
+@api_view(['GET','POST'])   
+def update_progress(request):
+    if request.method == 'POST':
+        student_id = request.POST.get('student_id')
+        lesson_id = request.POST.get('lesson_id')
+        activity_id = request.POST.get('activity_id')
+        assessment_id = request.POST.get('assessment_id')
+        info_id = request.POST.get('info_id')
+
+        if not (student_id and lesson_id and (activity_id or assessment_id or info_id)):
+            return JsonResponse({'error': 'Student ID, lesson ID, and either activity ID, assessment ID, or info ID are required'}, status=400)
+
+        # Update student progress based on the provided IDs
+        # Example logic: Mark activity/assessment/info as completed for the student
+
+        if activity_id:
+            try:
+                activity = Activities.objects.get(pk=activity_id, lesson_id=lesson_id)
+                StudentActivityProgress.objects.update_or_create(student_id=student_id, activity=activity, defaults={'completed': True})
+                return JsonResponse({'success': 'Activity progress updated successfully'})
+            except Activities.DoesNotExist:
+                return JsonResponse({'error': 'Activity not found'}, status=404)
+
+        elif assessment_id:
+            try:
+                assessment = Assessment.objects.get(pk=assessment_id, lesson_id=lesson_id)
+                StudentAssessmentProgress.objects.update_or_create(student_id=student_id, assessment=assessment, defaults={'completed': True})
+                return JsonResponse({'success': 'Assessment progress updated successfully'})
+            except Assessment.DoesNotExist:
+                return JsonResponse({'error': 'Assessment not found'}, status=404)
+
+        elif info_id:
+            try:
+                info = Info.objects.get(pk=info_id, lesson_id=lesson_id)
+                StudentInfoProgress.objects.update_or_create(student_id=student_id, info=info, defaults={'completed': True})
+                return JsonResponse({'success': 'Info progress updated successfully'})
+            except Info.DoesNotExist:
+                return JsonResponse({'error': 'Info not found'}, status=404)
+
+    else:
+        return JsonResponse({'error': 'Only POST requests are allowed'}, status=405)
+    
+
+@csrf_exempt
+@api_view(['GET','POST'])  
+def get_course_analytics(request):
+    courses = Course.objects.all()
+    course_analytics = []
+
+    for course in courses:
+        total_lessons = course.lesson_set.count()
+        completed_lessons = StudentLessonProgress.objects.filter(lesson__course=course, student_id=1, completed=True).count()
+        course_completion_percentage = (completed_lessons / total_lessons) * 100 if total_lessons != 0 else 0
+
+        course_analytics.append({
+            'course_title': course.title,
+            'course_completion_percentage': course_completion_percentage,
+            'completed_lessons': completed_lessons,
+            'total_lessons': total_lessons,
+        })
+
+    return JsonResponse(course_analytics, safe=False)
+
+
+@csrf_exempt
+@api_view(['GET','POST'])  
+def get_lesson_analytics(request):
+    lessons = Lesson.objects.filter(course_id=1)
+    lesson_analytics = []
+
+    for lesson in lessons:
+        total_sections = (
+            lesson.activities_set.count() +
+            lesson.assessment_set.count() +
+            lesson.info_set.count()
+        )
+
+        completed_sections = (
+            StudentActivityProgress.objects.filter(activity__lesson=lesson, student_id=1, completed=True).count() +
+            StudentAssessmentProgress.objects.filter(assessment__lesson=lesson, student_id=1, completed=True).count() +
+            StudentInfoProgress.objects.filter(info__lesson=lesson, student_id=1, completed=True).count()
+        )
+
+        lesson_completion_percentage = (completed_sections / total_sections) * 100 if total_sections != 0 else 0
+
+        lesson_analytics.append({
+            'lesson_title': lesson.title,
+            'lesson_completion_percentage': lesson_completion_percentage,
+            'completed_sections': completed_sections,
+            'total_sections': total_sections,
+        })
+
+    return JsonResponse(lesson_analytics, safe=False)
 
 @csrf_exempt       
 @api_view(['GET','POST'])
