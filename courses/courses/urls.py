@@ -26,6 +26,8 @@ urlpatterns = [
     path('activities/<int:lesson_id>', views.activities),
     path('questions/<int:assesment_id>', views.questions),
     path('users/', views.users),
+    path('get_messages/', views.get_messages),
+    path('send_message/', views.send_message),
     path('update_progress/', views.update_progress),
     path('get_lesson_analytics/', views.get_lesson_analytics),
     path('get_course_analytics/', views.get_course_analytics),

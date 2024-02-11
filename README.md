@@ -43,6 +43,13 @@ Routes working till Now:
     'questions/<int:assesment_id>' --GET
     'users/' --GET
     'login/' --POST
+    'get_course_analytics/'  --GET
+    'get_lesson_analytics/'  --GET
+    'update_progress/'  --POST
+    'send_message/'  --POST
+    'get_messages/'  --GET
+
+All the requirements and modules are completed
 
 
 another Admin Credentials added:

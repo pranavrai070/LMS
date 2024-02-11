@@ -8,8 +8,8 @@ from rest_framework import status
 from django.utils import timezone
 from datetime import timedelta
 from .serializers import CourseSerializer,AssessmentSerializer,LessonSerializer
-from .models import Course, Lesson, Assessment,Activities,Users,Question,student_progress,tr_user_login_token,StudentActivityProgress,StudentAssessmentProgress,StudentInfoProgress,Info,StudentLessonProgress
-from .serializers import CourseSerializer, LessonSerializer, AssessmentSerializer,ActivitiesSerializer,UsersSerializer,QuestionsSerializer,student_progressSerializer,tr_user_login_token_Serializer,StudentActivityProgressSerializer,StudentLessonProgressSerializer,StudentInfoProgressSerializer,InfoSerializer
+from .models import Course, Lesson, Assessment,Activities,Users,Message,Question,student_progress,tr_user_login_token,StudentActivityProgress,StudentAssessmentProgress,StudentInfoProgress,Info,StudentLessonProgress
+from .serializers import CourseSerializer, LessonSerializer,MessageSerializer, AssessmentSerializer,ActivitiesSerializer,UsersSerializer,QuestionsSerializer,student_progressSerializer,tr_user_login_token_Serializer,StudentActivityProgressSerializer,StudentLessonProgressSerializer,StudentInfoProgressSerializer,InfoSerializer
 import secrets
 
 
@@ -136,6 +136,41 @@ def questions(request,assesment_id):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         else:
             return Response({"message":"Data is Not Validated"},status=status.HTTP_400_BAD_REQUEST)
+
+
+@csrf_exempt
+@api_view(['GET','POST'])
+def send_message(request):
+    sender_id = request.data['sender']
+    receiver_id = request.data['receiver_id']
+    subject = request.data['subject']
+    content = request.data['content']
+
+    if not (receiver_id and subject and content):
+        return JsonResponse({'error': 'Receiver ID, subject, and content are required'}, status=400)
+
+    try:
+        receiver = Users.objects.get(pk=receiver_id)
+        sender=Users.objects.get(pk=sender_id)
+        message = Message.objects.create(sender=sender, receiver=receiver, subject=subject, content=content)
+        return JsonResponse({'message_id': message.id}, status=201)
+    except Users.DoesNotExist:
+        return JsonResponse({'error': 'Receiver not found'}, status=404)
+    
+
+@csrf_exempt
+@api_view(['GET','POST']) 
+def get_messages(request):
+    print("getting message route hit")
+    print(request)
+    user = request.data['user']
+    messages_sent = Message.objects.filter(sender=user)
+    messages_received = Message.objects.filter(receiver=user)
+
+    sent_messages_data = [{'id': msg.id,  'subject': msg.subject, 'content': msg.content, 'timestamp': msg.timestamp} for msg in messages_sent]
+    received_messages_data = [{'id': msg.id, 'subject': msg.subject, 'content': msg.content, 'timestamp': msg.timestamp, 'is_read': msg.is_read} for msg in messages_received]
+
+    return JsonResponse({'sent_messages': sent_messages_data, 'received_messages': received_messages_data})
         
 
 @csrf_exempt
