@@ -32,8 +32,7 @@ Do pip install packagename for any package
 Django models for storing and organizing educational resources.
 APIs for searching, categorization, and accessing resources.
 
-Id for admin login: pranav
-password for admin login : Django@1999
+
 
 Routes working till Now:
     'courses/'  --GET,POST
@@ -55,3 +54,13 @@ All the requirements and modules are completed
 another Admin Credentials added:
  username: admin
  password: password
+
+
+COMMAND TO START THE BACKEND SERVER
+1. Using Terminal move to the courses directory where manage.py file is present
+2. run the command : python manage.py runserver 8000 to run the project on 8000 PORT 
+3. visit http://127.0.0.1:8000/admin/ , you will see admin dashboard for login 
+4. Admin Credentials:
+ username: admin
+ password: password
+5. you can control your backend from dashboard.
